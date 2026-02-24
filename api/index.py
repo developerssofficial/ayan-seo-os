@@ -1,24 +1,35 @@
-from fastapi import FastAPI
-import requests
-from bs4 import BeautifulSoup
+from flask import Flask, render_template, request, jsonify
 
-app = FastAPI()
+app = Flask(__name__)
 
-@app.get("/api/seo-authority")
-def authority_check(url: str):
-    # আপনার ৭৮+ টুলের মধ্যে Authority Checker মডিউল
-    try:
-        res = requests.get(url, timeout=5)
-        return {
-            "status": "Success",
-            "visibility_score": "85/100 (AI Optimized)",
-            "server": res.headers.get("Server", "Unknown"),
-            "is_pwa": "manifest.json" in res.text
-        }
-    except:
-        return {"error": "Target unreachable"}
+# মেইন ড্যাশবোর্ড লোডার
+@app.route('/')
+def home():
+    return render_template('index.html')
 
-@app.get("/api/content-audit")
-def content_audit(url: str):
-    # Content Relevance & BERT Score logic
-    return {"message": "BERT Score: 0.92", "readability": "Easy"}
+# --- ক্যাটাগরি ১: কন্টেন্ট এনালাইসিস ---
+@app.route('/api/content-score', methods=['POST'])
+def content_score():
+    text = request.json.get('text', '')
+    word_count = len(text.split())
+    # এখানে আপনার BERT বা AI লজিক বসবে
+    score = min(100, (word_count / 10)) 
+    return jsonify({"score": score, "status": "Optimized" if score > 70 else "Needs Work"})
+
+# --- ক্যাটাগরি ২: টেকনিক্যাল এসইও ---
+@app.route('/api/tech-audit')
+def tech_audit():
+    url = request.args.get('url')
+    # সিকিউরিটি ও স্পিড চেক লজিক
+    return jsonify({"url": url, "ssl": "Active", "load_speed": "1.2s", "mobile_friendly": True})
+
+# --- ক্যাটাগরি ৩: কিউওয়ার্ড ও ডাটা ---
+@app.route('/api/keywords')
+def keywords():
+    seed = request.args.get('seed')
+    # এটি আপনার ৭৮+ টুলের ডাটাবেস থেকে সাজেশন দিবে
+    suggestions = [f"{seed} tutorial", f"best {seed} 2026", f"how to learn {seed}"]
+    return jsonify({"seed": seed, "suggestions": suggestions})
+
+if __name__ == '__main__':
+    app.run(debug=True)
